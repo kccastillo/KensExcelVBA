@@ -1,0 +1,83 @@
+Function RemoveNumbers(Txt As String) As String
+' Removes employee IDs of the form 000000;
+With CreateObject("VBScript.RegExp")
+.Global = True
+.pattern = "[0-9]{6}[;]"
+RemoveNumbers = .Replace(Txt, "")
+End With
+End Function
+
+
+
+Function ConcatenateRange(ByVal cell_Range As Range, _
+                    Optional ByVal seperator As String) As String
+
+Dim cell As Range
+Dim newString As String
+Dim cellarray As Variant
+Dim i As Long, j As Long
+
+cellarray = cell_Range.Value
+
+For i = 1 To UBound(cellarray, 1)
+    For j = 1 To UBound(cellarray, 2)
+        If Len(cellarray(i, j)) <> 0 Then
+            newString = newString & (seperator & cellarray(i, j))
+        End If
+    Next
+Next
+
+If Len(newString) <> 0 Then
+    newString = Right$(newString, (Len(newString) - Len(seperator)))
+End If
+
+ConcatenateRange = newString
+
+End Function
+
+
+
+Function furthestRow(sourceRange As Range) As Long
+
+furthestRow = sourceRange.Find(What:="*", _
+                    After:=Cells(1, sourceRange.column), _
+                    LookAt:=xlPart, _
+                    LookIn:=xlFormulas, _
+                    SearchOrder:=xlByRows, _
+                    SearchDirection:=xlPrevious, _
+                    MatchCase:=False).Row
+
+End Function
+
+
+
+Function partialmatch(targetCell As Range, armsRange As Range) As String
+
+'this function returns a TRUE when any members of armsRange is a partial string match to the string casted contents of targetCell.
+
+Dim armsEndRow, _
+    armsLookRow _
+    As Long
+
+Dim targetArray, _
+    armsArray _
+    As Variant
+
+Dim escape As Boolean
+Dim target As String
+
+armsLookRow = 0
+armsEndRow = furthestRow(armsRange)
+target = CStr(targetCell.Cells.Value)
+ReDim armsArray(0 To armsEndRow - 1) As String
+
+For armsLookRow = 0 To armsEndRow
+   armsArray(armsLookRow) = armsRange.Cells(armsLookRow + 1, 1)
+Next armsLookRow
+
+partialmatch = CStr(armsLookRow)
+
+' Can't get armsLookRow to work, unsure if armsArray is initialising properly
+
+End Function
+
