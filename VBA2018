@@ -2,37 +2,9 @@ Function RemoveNumbers(Txt As String) As String
 ' Removes employee IDs of the form 000000;
 With CreateObject("VBScript.RegExp")
 .Global = True
-.pattern = "[0-9]{6}[;]"
+.Pattern = "[0-9]{6}[;]"
 RemoveNumbers = .Replace(Txt, "")
 End With
-End Function
-
-
-
-Function ConcatenateRange(ByVal cell_Range As Range, _
-                    Optional ByVal seperator As String) As String
-
-Dim cell As Range
-Dim newString As String
-Dim cellarray As Variant
-Dim i As Long, j As Long
-
-cellarray = cell_Range.Value
-
-For i = 1 To UBound(cellarray, 1)
-    For j = 1 To UBound(cellarray, 2)
-        If Len(cellarray(i, j)) <> 0 Then
-            newString = newString & (seperator & cellarray(i, j))
-        End If
-    Next
-Next
-
-If Len(newString) <> 0 Then
-    newString = Right$(newString, (Len(newString) - Len(seperator)))
-End If
-
-ConcatenateRange = newString
-
 End Function
 
 
@@ -40,7 +12,7 @@ End Function
 Function furthestRow(sourceRange As Range) As Long
 
 furthestRow = sourceRange.Find(What:="*", _
-                    After:=Cells(1, sourceRange.column), _
+                    After:=Cells(1, sourceRange.Column), _
                     LookAt:=xlPart, _
                     LookIn:=xlFormulas, _
                     SearchOrder:=xlByRows, _
@@ -49,35 +21,107 @@ furthestRow = sourceRange.Find(What:="*", _
 
 End Function
 
+Function earliestRow(sourceRange As Range) As Long
 
-
-Function partialmatch(targetCell As Range, armsRange As Range) As String
-
-'this function returns a TRUE when any members of armsRange is a partial string match to the string casted contents of targetCell.
-
-Dim armsEndRow, _
-    armsLookRow _
-    As Long
-
-Dim targetArray, _
-    armsArray _
-    As Variant
-
-Dim escape As Boolean
-Dim target As String
-
-armsLookRow = 0
-armsEndRow = furthestRow(armsRange)
-target = CStr(targetCell.Cells.Value)
-ReDim armsArray(0 To armsEndRow - 1) As String
-
-For armsLookRow = 0 To armsEndRow
-   armsArray(armsLookRow) = armsRange.Cells(armsLookRow + 1, 1)
-Next armsLookRow
-
-partialmatch = CStr(armsLookRow)
-
-' Can't get armsLookRow to work, unsure if armsArray is initialising properly
+earliestRow = sourceRange.Find(What:="*", _
+                    After:=Cells(furthestRow(sourceRange), sourceRange.Column), _
+                    LookAt:=xlPart, _
+                    LookIn:=xlFormulas, _
+                    SearchOrder:=xlByRows, _
+                    SearchDirection:=xlNext, _
+                    MatchCase:=False).Row
 
 End Function
+
+Function loadArray(sourceRange As Range) As Variant
+
+' works for a single column only (1d array)
+
+Dim i, j, sourceLookRow, sourceEndRow, sourceLength As Long
+Dim outputArray As Variant
+
+i = 0
+sourceLookRow = earliestRow(sourceRange)
+sourceEndRow = furthestRow(sourceRange)
+sourceLength = sourceEndRow - sourceLookRow
+
+' Extract and Load
+
+For i = 0 To sourceLength
+  outputArray(i) = sourceRange.Cells(sourceLookRow, 1).Value
+  sourceLookRow = sourceLookRow + 1
+Next
+
+loadArray = outputArray
+
+End Function
+
+Function ConcatenateRange(sourceRange As Range, _
+                    Optional ByVal seperator As String) As String
+
+Dim lookCell As Range
+Dim outputString As String
+Dim outputArray As Variant
+Dim i, j As Long
+
+' Load Range to Array
+
+outputArray = sourceRange.Value
+
+' Extract and Load
+
+For i = 1 To UBound(outputArray, 1)
+    For j = 1 To UBound(outputArray, 2)
+        If Len(outputArray(i, j)) <> 0 Then
+            outputString = outputString & (seperator & outputArray(i, j))
+        End If
+    Next
+Next
+
+'Trim leading separator
+
+    If Len(outputString) <> 0 Then
+        outputString = Right$(outputString, (Len(outputString) - Len(seperator)))
+    End If
+
+ConcatenateRange = outputString
+
+End Function
+
+Function partialMatch(targetCell As Range, armsRange As Range) As Boolean
+
+Dim i, armsLookRow, armsEndRow, armsLength As Long
+Dim target As String
+Dim hit As Boolean
+
+armsLength = furthestRow(armsRange) - earliestRow(armsRange)
+armsLookRow = earliestRow(armsRange)
+target = ConcatenateRange(targetCell)
+hit = False
+
+For i = 0 To armsLength
+  If InStr(target, CStr(armsRange.Cells(armsLookRow, 1).Value)) > 0 Then
+    armsLookRow = armsLookRow + 1
+    hit = True
+  End If
+Next
+
+partialMatch = hit
+
+End Function
+
+' TARGET LIST
+' 101604, abracadabra, excelcior
+' jimmy crocket, 111821, lasuverie
+' dangerous liasions
+' albequerque
+' mississippi
+' chewy donuts, 101604
+' alfalfa
+
+' ARMS LIST
+' abracadabra
+' 101604
+' sippi
+' nuts
 
