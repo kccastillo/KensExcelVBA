@@ -1,13 +1,14 @@
 Function RemoveNumbers(Txt As String) As String
+
 ' Removes employee IDs of the form 000000;
+
 With CreateObject("VBScript.RegExp")
-.Global = True
-.Pattern = "[0-9]{6}[;]"
+    .Global = True
+    .Pattern = "[0-9]{6}[;]"
 RemoveNumbers = .Replace(Txt, "")
 End With
+
 End Function
-
-
 
 Function furthestRow(sourceRange As Range) As Long
 
@@ -57,7 +58,7 @@ loadArray = outputArray
 End Function
 
 Function ConcatenateRange(sourceRange As Range, _
-                    Optional ByVal seperator As String) As String
+                    Optional seperator As String) As String
 
 Dim lookCell As Range
 Dim outputString As String
@@ -88,40 +89,40 @@ ConcatenateRange = outputString
 
 End Function
 
+Function inStringMatch(targetCell As Range, armsCell As Range) As Long
+
+inStringMatch = InStr(targetCell, armsCell)
+
+End Function
+
 Function partialMatch(targetCell As Range, armsRange As Range) As Boolean
 
-Dim i, armsLookRow, armsEndRow, armsLength As Long
+Dim i, check, armsLookRow, armsLength As Long
 Dim target As String
 Dim hit As Boolean
 
-armsLength = furthestRow(armsRange) - earliestRow(armsRange)
 armsLookRow = earliestRow(armsRange)
-target = ConcatenateRange(targetCell)
+armsLength = furthestRow(armsRange) - earliestRow(armsRange)
+target = targetCell.Value
+
 hit = False
 
 For i = 0 To armsLength
-  If InStr(target, CStr(armsRange.Cells(armsLookRow, 1).Value)) > 0 Then
+
+    If CStr(armsRange.Cells(armsLookRow, 1).Value) = "" Then
+            check = 0
+        Else
+            check = InStr(target, CStr(armsRange.Cells(armsLookRow, 1).Value))
+        End If
+    
+    If check > 0 Then
+            hit = True
+        End If
+    
     armsLookRow = armsLookRow + 1
-    hit = True
-  End If
+    
 Next
 
 partialMatch = hit
 
 End Function
-
-' TARGET LIST
-' 101604, abracadabra, excelcior
-' jimmy crocket, 111821, lasuverie
-' dangerous liasions
-' albequerque
-' mississippi
-' chewy donuts, 101604
-' alfalfa
-
-' ARMS LIST
-' abracadabra
-' 101604
-' sippi
-' nuts
-
