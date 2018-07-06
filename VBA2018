@@ -10,27 +10,87 @@ End With
 
 End Function
 
+Function columnsSelected(sourceRange As Range) As Long
+
+Dim sourceArray As Variant
+Dim maxColumns As Long
+
+columnsSelected = sourceRange.Columns.CountLarge
+
+'maxColumns = 16384 ' as per https://support.office.com/en-us/article/excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3
+
+End Function
+
+Function rowsSelected(sourceRange As Range) As Long
+
+Dim sourceArray As Variant
+Dim maxRows As Long
+
+rowsSelected = sourceRange.Rows.CountLarge
+
+'maxRows = 1048576 ' as per https://support.office.com/en-us/article/excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3
+
+End Function
+
 Function furthestRow(sourceRange As Range) As Long
 
-furthestRow = sourceRange.Find(What:="*", _
-                    After:=Cells(1, sourceRange.Column), _
-                    LookAt:=xlPart, _
-                    LookIn:=xlFormulas, _
-                    SearchOrder:=xlByRows, _
-                    SearchDirection:=xlPrevious, _
-                    MatchCase:=False).Row
+Dim i, rowCount As Long
+
+rowCount = 0
+
+If rowsSelected(sourceRange) = 1048576 Then
+
+    rowCount = sourceRange.Find(What:="*", _
+               After:=Cells(1, sourceRange.Column), _
+               LookAt:=xlPart, _
+               LookIn:=xlFormulas, _
+               SearchOrder:=xlByRows, _
+               SearchDirection:=xlPrevious, _
+               MatchCase:=False).Row
+
+    Else
+    
+    For i = 1 To rowsSelected(sourceRange)
+        If sourceRange.Cells(i, 1).Value <> "" Then
+            rowCount = rowCount + 1
+        End If
+    Next
+    
+    End If
+    
+furthestRow = rowCount
 
 End Function
 
 Function earliestRow(sourceRange As Range) As Long
 
-earliestRow = sourceRange.Find(What:="*", _
-                    After:=Cells(furthestRow(sourceRange), sourceRange.Column), _
-                    LookAt:=xlPart, _
-                    LookIn:=xlFormulas, _
-                    SearchOrder:=xlByRows, _
-                    SearchDirection:=xlNext, _
-                    MatchCase:=False).Row
+Dim i, rowCount As Long
+
+
+
+If rowsSelected(sourceRange) = 1048576 Then
+
+    rowCount = sourceRange.Find(What:="*", _
+               After:=Cells(furthestRow(sourceRange), sourceRange.Column), _
+               LookAt:=xlPart, _
+               LookIn:=xlFormulas, _
+               SearchOrder:=xlByRows, _
+               SearchDirection:=xlNext, _
+               MatchCase:=False).Row
+               
+    Else
+    
+    rowCount = rowsSelected(sourceRange)
+    
+    For i = rowsSelected(sourceRange) To 1
+        If sourceRange.Cells(i, 1).Value <> "" Then
+            rowCount = rowCount - 1
+        End If
+    Next
+    
+    End If
+    
+earliestRow = rowCount
 
 End Function
 
@@ -96,6 +156,16 @@ inStringMatch = InStr(targetCell, armsCell)
 End Function
 
 Function partialMatch(targetCell As Range, armsRange As Range) As Boolean
+
+'OVERVIEW
+'partialMatch will return true if any strings in cells within armsRange can be found in the targetCell string.
+
+'LIMITATIONS
+'targetCell must be a single cell
+'armsRange must occupy an entire column, no header (dependency: earliestRow and furthestRow)
+
+'TESTED AGAINST
+'armsRange can contain empty cells between entries
 
 Dim i, check, armsLookRow, armsLength As Long
 Dim target As String
