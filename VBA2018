@@ -1,12 +1,12 @@
-Function RemoveNumbers(Txt As String) As String
+Function stripByRegEx(targetString As String, searchString As String) As String
 
-' Removes employee IDs of the form 000000;
+' Removes recurrent text in the RegEx form of the searchString from the targetString;
 
 With CreateObject("VBScript.RegExp")
     .Global = True
-    .Pattern = "[0-9]{6}[;]"
-RemoveNumbers = .Replace(Txt, "")
-End With
+    .Pattern = searchString ' for employee ID, "[0-9]{6}[;]"
+    stripByRegEx = .Replace(Txt, "")
+    End With
 
 End Function
 
@@ -65,8 +65,6 @@ End Function
 Function earliestRow(sourceRange As Range) As Long
 
 Dim i, rowCount As Long
-
-
 
 If rowsSelected(sourceRange) = 1048576 Then
 
@@ -196,3 +194,5 @@ Next
 partialMatch = hit
 
 End Function
+
+
