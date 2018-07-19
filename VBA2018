@@ -3,6 +3,8 @@ Function regExtract(targetString As String, searchString As String) As String
 ' Returns first RegEx match of searchString from targetString;
 
 With CreateObject("VBScript.RegExp")
+    .IgnoreCase = True
+    .MultiLine = True
     .Global = True
     .Pattern = searchString ' for employee ID, "[0-9]{6}[;]"
     regExtract = .Execute(targetString)(0)
