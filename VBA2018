@@ -1,11 +1,18 @@
 Function regExtract(targetString As String, searchString As String) As String
 
-' Returns first RegEx match of searchString from targetString;
+' Returns first RegEx match of searchString from targetString
+
+' smtp:\w+(\W\w+)?(\W\w+)?(\W\w+)?@brisbane.qld.gov.au
+' sip:\w+(\W\w+)?(\W\w+)?(\W\w+)?@brisbane.qld.gov.au
+
+'=IFERROR(SUBSTITUTE(regExtract([@[smtp proxy]],"smtp:\w+(\W\w+)?(\W\w+)?(\W\w+)?@brisbane.qld.gov.au"),"smtp:",""),"")
+'=IFERROR(SUBSTITUTE(regExtract([@[smtp proxy]],"sip:\w+(\W\w+)?(\W\w+)?(\W\w+)?@brisbane.qld.gov.au"),"sip:",""),"")
 
 With CreateObject("VBScript.RegExp")
     .Global = True
-    .Pattern = searchString ' for employee ID, "[0-9]{6}[;]"
-    regExtract = .Execute(targetString)(0)    
+    .Ignorecase = False
+    .Pattern = searchString
+    regExtract = .Execute(targetString)(0)
     End With
 
 End Function
