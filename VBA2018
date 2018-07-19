@@ -1,3 +1,16 @@
+Function regExtract(targetString As String, searchString As String) As String
+
+' Returns first RegEx match of searchString from targetString;
+
+With CreateObject("VBScript.RegExp")
+    .Global = True
+    .Pattern = searchString ' for employee ID, "[0-9]{6}[;]"
+    regExtract = .Execute(targetString)(0)
+    
+    End With
+
+End Function
+
 Function stripByRegEx(targetString As String, searchString As String) As String
 
 ' Removes recurrent text in the RegEx form of the searchString from the targetString;
